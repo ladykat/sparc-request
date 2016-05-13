@@ -10,18 +10,19 @@
   .panel-heading
     %h3.panel-title
       Additional Detail Forms
-  = link_to 'Add new Additional Details Form', new_additional_detail_path,
-    class: 'btn btn-primary btn-lg'
-  %table.table-bordered.table-striped
-    %th
-      Additional Detail Form
-    %th
-      Responses
-    %th
-      Name
-    %th
-      Effective Date
-    %th
-      Enabled
-    %th
-      Description
+  .panel-body
+    = link_to 'Add new Additional Details Form', new_additional_detail_path,
+      class: 'btn btn-primary btn-lg'
+    %table.table-bordered.table-striped
+      %th
+        Additional Detail Form
+      %th
+        Responses
+      %th
+        Name
+      %th
+        Effective Date
+      %th
+        Enabled
+      %th
+        Description

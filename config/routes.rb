@@ -35,7 +35,7 @@ SparcRails::Application.routes.draw do
                }
   end
 
-  resources :additional_details, only: [:index]
+  resources :additional_details, only: [:index, :new]
 
   resources :identities, only: [:show] do
     collection do

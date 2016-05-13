@@ -1,2 +1,24 @@
+%ul.nav.nav-tabs
+  %li
+    = link_to '#additional-details', data: { toggle: 'tab' } do
+      Additional Details
+      %span.badge
+        Enabled
+  %li
+    = link_to 'Responses', '#responses', data: { toggle: 'tab' }
+%br
 = link_to 'Add new Additional Details Form', '#',
   class: 'btn btn-primary btn-lg'
+%table.table-bordered.table-striped
+  %th
+    Additional Detail Form
+  %th
+    Responses
+  %th
+    Name
+  %th
+    Effective Date
+  %th
+    Enabled
+  %th
+    Description

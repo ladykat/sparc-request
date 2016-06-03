@@ -37,11 +37,11 @@
               .col-sm-7
                 = form.text_field "date", {class: 'form-control datetimepicker', id: 'date_fulfilled_field', value: format_date(fulfillment.date)}
             .form-group
-              = form.label "time", t(:dashboard)[:fulfillments][:form][:time], class: "col-sm-4 control-label"
+              = form.label "quantity", t(:dashboard)[:fulfillments][:form][:quantity], class: "col-sm-4 control-label"
               .col-sm-7
-                = form.text_field "time", {class: 'form-control'}
+                = form.text_field "quantity", {class: 'form-control'}
             .form-group
-              = form.label "timeframe", t(:dashboard)[:fulfillments][:form][:time_unit], class: "col-sm-4 control-label"
+              = form.label "timeframe", t(:dashboard)[:fulfillments][:form][:qty_type], class: "col-sm-4 control-label"
               .col-sm-7
                 = form.select "timeframe", options_for_select(Fulfillment::QUANTITY_TYPES, fulfillment.timeframe), {}, class: 'form-control selectpicker'
       .modal-footer

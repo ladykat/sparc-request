@@ -35,7 +35,7 @@ class Fulfillment < ActiveRecord::Base
   attr_accessible :unit_type
   attr_accessible :formatted_date
 
-  validates :time, format: { with: /\A\d+(?:\.\d{0,2})?\z/,
+  validates :quantity, format: { with: /\A\d+(?:\.\d{0,2})?\z/,
                              message: 'must be numerical' },
                              numericality: { greater_than: 0,
                                              message: 'must be numerical'}

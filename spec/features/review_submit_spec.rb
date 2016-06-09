@@ -52,10 +52,12 @@ RSpec.describe "review page", js: true do
 
   describe "clicking submit" do
     it 'Should submit the page', js: true do
-      find("#submit_services2").click
+      find("#submit_services1").click
       wait_for_javascript_to_finish
-      click_button("No")
-      wait_for_javascript_to_finish
+      if SYSTEM_SATISFACTION_SURVEY
+        click_button("No")
+        wait_for_javascript_to_finish
+      end
       service_request_test = ServiceRequest.find(service_request.id)
       expect(service_request_test.status).to eq("submitted")
     end
@@ -74,7 +76,7 @@ RSpec.describe "review page", js: true do
         wait_for_javascript_to_finish
         find("button.ui-button .ui-button-text", text: "Yes").click
         wait_for_javascript_to_finish
-        expect(current_path).to eq(portal_root_path)
+        expect(current_path).to eq(dashboard_root_path)
       end
     end
 
@@ -89,36 +91,15 @@ RSpec.describe "review page", js: true do
     end
   end
 
-  describe "clicking get a cost estimate and declining the system satisfaction survey" do
+  describe "clicking get a cost estimate and declining the system satisfaction survey (if turned on)" do
     it 'Should submit the page', js: true do
       find("#get_a_cost_estimate").click
-      find(:xpath, "//button/span[text()='No']/..").click
-      wait_for_javascript_to_finish
-      service_request_test = ServiceRequest.find(service_request.id)
-      expect(service_request_test.status).to eq("get_a_cost_estimate")
-    end
-  end
-
-  describe "clicking get a cost estimate and accepting the system satisfaction survey" do
-    it 'Should submit the page', js: true do
-      find("#get_a_cost_estimate").click
-      find(:xpath, "//button/span[text()='Yes']/..").click
-      wait_for_javascript_to_finish
-
-      # select Yes to next question and you should see text area for Yes
-      all("#r_1_answer_id_input input").first().click
-      wait_for_javascript_to_finish
-      fill_in "r_2_text_value", with: "I love it"
-
-      # select No to next question and you should see text area for No
-      all("#r_1_answer_id_input input").last().click
-      wait_for_javascript_to_finish
-      fill_in "r_3_text_value", with: "I hate it"
-
-      within(:css, "div.next_section") do
-        click_button 'Submit'
+      if SYSTEM_SATISFACTION_SURVEY
+        find(:xpath, "//button/span[text()='No']/..").click
         wait_for_javascript_to_finish
       end
+      service_request_test = ServiceRequest.find(service_request.id)
+      expect(service_request_test.status).to eq("get_a_cost_estimate")
     end
   end
 
@@ -130,10 +111,12 @@ RSpec.describe "review page", js: true do
       service2.update_attributes(send_to_epic: true, charge_code: nil, cpt_code: nil)
       service_request.protocol.update_attribute(:selected_for_epic, true)
       clear_emails
-      find("#submit_services2").click
+      find("#submit_services1").click
       wait_for_javascript_to_finish
-      click_button("No")
-      wait_for_javascript_to_finish
+      if SYSTEM_SATISFACTION_SURVEY
+        click_button("No")
+        wait_for_javascript_to_finish
+      end
       @email = all_emails.find { |email| email.subject == "Epic Rights Approval"}
       service_request.update_attributes(status: 'submitted')
     end

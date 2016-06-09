@@ -55,7 +55,7 @@ RSpec.describe "edit study epic box", js: true do
         it 'should throw an error when trying to submit incomplete epic box info' do
           find('.continue_button').click
           expect(page).to have_content("1 error prohibited this study from being saved")
-          expect(page).to have_content("Study type questions must be selected")
+          expect(page).to have_content("Study type answers must be selected")
           expect(page).to have_select('study_type_answer_certificate_of_conf_answer', selected: 'No')
           expect(page).to have_select('study_type_answer_higher_level_of_privacy_answer', selected: 'Select One')
         end
@@ -103,7 +103,7 @@ RSpec.describe "edit study epic box", js: true do
         it 'should throw an error when trying to submit incomplete epic box info' do
           find('.continue_button').click
           expect(page).to have_content("1 error prohibited this study from being saved")
-          expect(page).to have_content("Study type questions must be selected")
+          expect(page).to have_content("Study type answers must be selected")
           expect(page).to have_select('study_type_answer_certificate_of_conf_answer', selected: 'No')
           expect(page).to have_select('study_type_answer_higher_level_of_privacy_answer', selected: 'No')
           expect(page).to_not have_selector('#study_type_answer_access_study_info')
@@ -137,7 +137,7 @@ RSpec.describe "edit study epic box", js: true do
         it 'should throw an error when trying to submit incomplete epic box info' do
           find('.continue_button').click
           expect(page).to have_content("1 error prohibited this study from being saved")
-          expect(page).to have_content("Study type questions must be selected")
+          expect(page).to have_content("Study type answers must be selected")
           expect(page).to have_select('study_type_answer_certificate_of_conf_answer', selected: 'No')
           expect(page).to have_select('study_type_answer_higher_level_of_privacy_answer', selected: 'Yes')
           expect(page).to have_select('study_type_answer_access_study_info_answer', selected: 'No')
@@ -146,32 +146,7 @@ RSpec.describe "edit study epic box", js: true do
           expect(page).to have_select('study_type_answer_restrict_sending_answer', selected: 'Select One')
         end
       end
-      context 'submitting a form with a missing field in epic box' do
 
-        before do
-
-          select "Select One", from: 'study_type_answer_certificate_of_conf_answer'
-
-        end
-
-        it 'should throw an error and display the fields that need to be answered' do
-          find('.continue_button').click
-          expect(page).to have_content("1 error prohibited this study from being saved")
-          expect(page).to have_content("Study type questions must be selected")
-          expect(page).to have_select('study_type_answer_certificate_of_conf_answer', selected: 'Select One')
-          expect(page).to_not have_selector('#study_type_answer_higher_level_of_privacy')
-          expect(page).to_not have_selector('#study_type_answer_access_study_info')
-          expect(page).to_not have_selector('#study_type_answer_epic_inbasket')
-          expect(page).to_not have_selector('#study_type_answer_research_active')
-          expect(page).to_not have_selector('#study_type_answer_restrict_sending')
-        end
-
-        it 'should remove error message when missing fields have been filled in' do
-          select "Yes", from: 'study_type_answer_certificate_of_conf_answer'
-          expect(page).to_not have_content("Study type questions must be selected")
-        end
-
-      end
       context 'change 1. to NO, 2. to YES, 2b. to YES ' do
 
         before do
@@ -187,7 +162,7 @@ RSpec.describe "edit study epic box", js: true do
 
           expect(page).to have_select('study_type_answer_certificate_of_conf_answer', selected: 'No')
           expect(page).to have_select('study_type_answer_higher_level_of_privacy_answer', selected: 'Yes')
-          expect(page).to have_select('study_type_answer_access_study_info_answer'), selected: 'Yes'
+          expect(page).to have_select('study_type_answer_access_study_info_answer', selected: 'Yes')
           expect(page).to_not have_selector('#study_type_answer_epic_inbasket')
           expect(page).to_not have_selector('#study_type_answer_research_active')
           expect(page).to_not have_selector('#study_type_answer_restrict_sending')
@@ -205,11 +180,9 @@ RSpec.describe "edit study epic box", js: true do
           wait_for_javascript_to_finish
           find('.continue_button').click
           wait_for_javascript_to_finish
-
         end
 
         it 'new study type should be 7' do
-
           expect(Protocol.find(study.id).determine_study_type).to eq "7"
 
         end

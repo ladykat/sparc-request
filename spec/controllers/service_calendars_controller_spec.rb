@@ -39,7 +39,7 @@ RSpec.describe ServiceCalendarsController do
   let_there_be_j
   build_service_request_with_project
   stub_controller
-  stub_portal_controller
+  stub_catalog_manager_controller
 
   before(:each) do
     session[:identity_id] = jug2

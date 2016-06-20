@@ -79,7 +79,7 @@ namespace :file do
 
     # A list of files and folders to ignore
     files_to_ignore = ['tmp/', 'import/', '.png', '.gif', '.jpeg', '.jpg', 'jquery', '.xcf', '.svg', '.pdf', '.cur', '.md',
-                       'schema', '.csv', '.log', 'public/', '.doc', '.sql', '.lock', '.xml']
+                       'schema', '.csv', '.log', 'public/', '.doc', '.sql', '.lock', '.xml', 'coverage/']
 
     # Get a list of all files that could need the copyright information
     file_list = Dir.glob(all).reject { |x| files_to_ignore.detect { |y| x.include? y } }

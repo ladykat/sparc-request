@@ -78,6 +78,7 @@ development:
   about_sparc_url: http://academicdepartments.musc.edu/sctr/sparc_request
   use_about_sparc_link: true
   use_feedback_link: true
+  exception_recipients: ['catesa@musc.edu', 'johstu@musc.edu', 'leonarjp@musc.edu', 'wiel@musc.edu', 'lohrp@musc.edu', 'holtw@musc.edu']
 
 test:
   default_mail_to: nobody@nowhere.com

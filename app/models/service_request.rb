@@ -33,7 +33,7 @@ class ServiceRequest < ActiveRecord::Base
   has_many :approvals, :dependent => :destroy
   has_many :arms, :through => :protocol
   has_many :notes, as: :notable, dependent: :destroy
-  
+
   after_save :set_original_submitted_date
 
   validation_group :protocol do
@@ -479,7 +479,7 @@ class ServiceRequest < ActiveRecord::Base
 
   # Change the status of the service request and all the sub service
   # requests to the given status.
-  def update_status(new_status, use_validation=true)
+  def update_status(new_status, identity, use_validation=true)
     to_notify = []
 
     self.assign_attributes(status: new_status)
@@ -493,7 +493,7 @@ class ServiceRequest < ActiveRecord::Base
 
       if changeable.include? new_status
         if ssr.status != new_status
-          ssr.update_attribute(:status, new_status)
+          ssr.update_status(new_status, identity)
           to_notify << ssr.id
         end
       end
@@ -569,7 +569,7 @@ class ServiceRequest < ActiveRecord::Base
 
     {:line_items => line_item_audits}
   end
-  
+
   def has_non_first_draft_ssrs?
     sub_service_requests.where.not(status: 'first_draft').any?
   end

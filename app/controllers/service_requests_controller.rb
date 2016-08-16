@@ -246,8 +246,7 @@ class ServiceRequestsController < ApplicationController
         to_notify << @sub_service_request.id
       end
 
-      @sub_service_request.update_attribute(:status, 'get_a_cost_estimate')
-      @sub_service_request.update_past_status(current_user)
+      @sub_service_request.update_status('get_a_cost_estimate', current_user)
     else
       to_notify = update_service_request_status(@service_request, 'get_a_cost_estimate')
     end
@@ -267,8 +266,8 @@ class ServiceRequestsController < ApplicationController
         to_notify << @sub_service_request.id
       end
 
-      @sub_service_request.update_attributes(status: 'submitted', nursing_nutrition_approved: false, lab_approved: false, imaging_approved: false, committee_approved: false)
-      @sub_service_request.update_past_status(current_user)
+      @sub_service_request.update_attributes(nursing_nutrition_approved: false, lab_approved: false, imaging_approved: false, committee_approved: false)
+      @sub_service_request.update_status('submitted', current_user)
     else
       to_notify = update_service_request_status(@service_request, 'submitted')
       @service_request.update_arm_minimum_counts
@@ -660,8 +659,7 @@ class ServiceRequestsController < ApplicationController
       service_request.previous_submitted_at = @service_request.submitted_at
       service_request.update_attribute(:submitted_at, Time.now)
     end
-    service_request.update_status(status)
-    service_request.sub_service_requests.each {|ssr| ssr.update_past_status(current_user)}
+    service_request.update_status(status, identity)
   end
 
   def authorize_protocol_edit_request

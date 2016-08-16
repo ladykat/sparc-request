@@ -82,12 +82,6 @@ class SubServiceRequest < ActiveRecord::Base
     write_attribute(:requester_contacted_date, Time.strptime(date, "%m/%d/%Y")) if date.present?
   end
 
-  # Make sure that @prev_status is set whenever status is changed for update_past_status method.
-  def status= status
-    @prev_status = self.status
-    super(status)
-  end
-
   def formatted_status
     if AVAILABLE_STATUSES.has_key? status
       AVAILABLE_STATUSES[status]
@@ -380,13 +374,18 @@ class SubServiceRequest < ActiveRecord::Base
     candidates
   end
 
+  def update_status new_status, identity
+    self.update_past_status self.status, identity
+    self.update_attribute(:status, new_status)
+  end
+
   # Callback which gets called after the ssr is saved to ensure that the
   # past status is properly updated.  It should not normally be
   # necessarily to call this method.
-  def update_past_status identity
+  def update_past_status prev_status, identity
     old_status = self.past_statuses.last
-    if @prev_status and (not old_status or old_status.status != @prev_status)
-      self.past_statuses.create(status: @prev_status, date: Time.now, changed_by_id: identity.id)
+    if prev_status and (not old_status or old_status.status != prev_status)
+      self.past_statuses.create(status: prev_status, date: Time.now, changed_by_id: identity.id)
     end
   end
 

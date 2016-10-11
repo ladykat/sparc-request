@@ -40,17 +40,12 @@ class VisitGroup < ActiveRecord::Base
 
   acts_as_list scope: :arm
 
-  after_save :set_arm_edited_flag_on_subjects
   before_destroy :remove_appointments
 
   validates :name, presence: true
   validates :position, presence: true
   validates :day, presence: true, numericality: { only_integer: true }
   validate :day_must_be_in_order
-
-  def set_arm_edited_flag_on_subjects
-    self.arm.set_arm_edited_flag_on_subjects
-  end
 
   def <=> (other_vg)
     return self.day <=> other_vg.day

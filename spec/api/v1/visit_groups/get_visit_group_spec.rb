@@ -25,8 +25,6 @@ RSpec.describe 'SPARCCWF::APIv1', type: :request do
   describe 'GET /v1/visit_group/:id.json' do
 
     before do
-      VisitGroup.skip_callback(:save, :after, :set_arm_edited_flag_on_subjects)
-
       @visit_group = create(:visit_group, :with_arm)
     end
 

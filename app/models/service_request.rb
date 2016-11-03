@@ -426,8 +426,8 @@ class ServiceRequest < ActiveRecord::Base
       next unless ssr.can_be_edited? && !ssr.is_complete?
       available = AVAILABLE_STATUSES.keys
       editable = EDITABLE_STATUSES[ssr.organization_id] || available
-
-      changeable = available & editable
+      updatable = UPDATABLE_STATUSES
+      changeable = available & editable & updatable
 
       if changeable.include? new_status
         if ssr.status != new_status

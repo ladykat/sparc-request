@@ -20,12 +20,12 @@
 
 class Study < Protocol
   validates :sponsor_name,                presence: true
-  validates :selected_for_epic,           inclusion: [true, false], :if => [:is_epic?]
+  validates :selected_for_epic,           inclusion: [true, false], if: [:is_epic?]
   validate  :validate_study_type_answers, if: [:selected_for_epic?, "StudyTypeQuestionGroup.active.pluck(:id).first == study_type_question_group_id"]
 
 
   def classes
-    return [ 'project' ] # for backward-compatibility
+    [ 'project' ] # for backward-compatibility
   end
 
   def determine_study_type
@@ -55,7 +55,7 @@ class Study < Protocol
     obj_names = StudyType::TYPES.map{|k,v| k}
     obj_names.each do |obj_name|
       study_type = study_types.detect{|obj| obj.name == obj_name}
-      study_type = study_types.build(:name => obj_name, :new => true) unless study_type
+      study_type = study_types.build(name: obj_name, new: true) unless study_type
       study_type.position = position
       position += 1
     end
@@ -75,7 +75,7 @@ class Study < Protocol
     obj_names = ImpactArea::TYPES.map{|k,v| k}
     obj_names.each do |obj_name|
       impact_area = impact_areas.detect{|obj| obj.name == obj_name}
-      impact_area = impact_areas.build(:name => obj_name, :new => true) unless impact_area
+      impact_area = impact_areas.build(name: obj_name, new: true) unless impact_area
       impact_area.position = position
       position += 1
     end
@@ -88,7 +88,7 @@ class Study < Protocol
     obj_names = Affiliation::TYPES.map{|k,v| k}
     obj_names.each do |obj_name|
       affiliation = affiliations.detect{|obj| obj.name == obj_name}
-      affiliation = affiliations.build(:name => obj_name, :new => true) unless affiliation
+      affiliation = affiliations.build(name: obj_name, new: true) unless affiliation
       affiliation.position = position
       position += 1
     end
@@ -100,40 +100,29 @@ class Study < Protocol
     project_roles.build(role: "primary-pi", project_rights: "approve") unless project_roles.primary_pis.any?
   end
 
-  FRIENDLY_IDS = ["certificate_of_conf", "higher_level_of_privacy", "epic_inbasket", "research_active", "restrict_sending"]
-
   def validate_study_type_answers
-    answers = {}
-    FRIENDLY_IDS.each do |fid|
-      q = StudyTypeQuestion.active.find_by_friendly_id(fid)
-      answers[fid] = study_type_answers.find{|x| x.study_type_question_id == q.id}
+    # Valid if certificate_of_conf answered and is either 1) "Yes" or 2) "No" with all the other questions answered.
+    c_of_c_answered   = !answer_for("certificate_of_conf").nil?
+    c_of_c_yes        = answer_for("certificate_of_conf") == true
+    other_qs_answered = (StudyTypeQuestion::FRIENDLY_IDS - ["certificate_of_conf"]).all? do |question|
+      !answer_for(question).nil?
     end
 
-    has_errors = false
-    begin
-      if answers["certificate_of_conf"].answer.nil?
-        has_errors = true
-      elsif answers["certificate_of_conf"].answer == false
-        if (answers["higher_level_of_privacy"].answer.nil?)
-          has_errors = true
-        elsif (answers["epic_inbasket"].answer.nil?)
-          has_errors = true
-        elsif (answers["research_active"].answer.nil?)
-          has_errors = true
-        elsif (answers["restrict_sending"].answer.nil?)
-          has_errors = true
-        end
-      end
-    rescue => e
-      has_errors = true
-    end
+    valid = c_of_c_answered && (c_of_c_yes || other_qs_answered)
 
-    if has_errors
+    unless valid
       errors.add(:study_type_answers, "must be selected")
     end
   end
 
   def is_epic?
     USE_EPIC
+  end
+
+  private
+
+  def answer_for(friendly_id)
+    question = StudyTypeQuestion.active.find_by(friendly_id: friendly_id)
+    study_type_answers.find_by(study_type_question_id: question.id).try(:answer)
   end
 end

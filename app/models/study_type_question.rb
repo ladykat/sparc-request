@@ -27,4 +27,7 @@ class StudyTypeQuestion < ActiveRecord::Base
 
   scope :active, -> { joins(:study_type_question_group).where(study_type_question_groups: { active: true })  }
   scope :inactive, -> { joins(:study_type_question_group).where(study_type_question_groups: { active: false }) }
+
+
+  FRIENDLY_IDS = %w(certificate_of_conf higher_level_of_privacy epic_inbasket research_active restrict_sending).freeze
 end

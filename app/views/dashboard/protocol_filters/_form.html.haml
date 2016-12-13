@@ -20,7 +20,7 @@
 
 .modal-dialog
   .modal-content
-    = form_for [:dashboard, protocol_filter], {remote: true, html: {role: "form"}} do |form|
+    = form_for [:dashboard, protocol_filter], {builder: BootstrapFormBuilder, width: 4, locale_base: t(:dashboard)[:protocol_filters][:saved_filters][:modal], remote: true, html: {role: "form"}} do |form|
       .modal-header
         %button.close{type: 'button', data: {dismiss: 'modal'}}
           %span{aria: {hidden:'true'}} &times;
@@ -42,9 +42,9 @@
             - protocol_filter.with_owner.each do |owner|
               = form.hidden_field :with_owner, multiple: true, value: owner
             .form-group
-              = form.label :search_name, t(:dashboard)[:protocol_filters][:saved_filters][:modal][:name], class: "col-sm-4 control-label"
+              = form.label :search_name
               .col-sm-7
-                = form.text_field :search_name, {class: 'form-control'}
+                = form.text_field :search_name
       .modal-footer
         .center-block
           %button.btn.btn-default{type: 'button', data: {dismiss: 'modal'}}

@@ -386,8 +386,8 @@ en:
         funding_status: "Proposal Funding Status:"
         funding_source: "Funding Source:"
         potential_funding_source: "Potential Funding Source:"
-        description: "Brief Description:"
-        rate: "Indirect Cost Rate:"
+        brief_description: "Brief Description:"
+        indirect_cost_rate: "Indirect Cost Rate:"
     prompts:
       status: "Select a Funding Status"
       source: "Select a Funding Source"

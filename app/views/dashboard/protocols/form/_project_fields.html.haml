@@ -48,12 +48,12 @@
         = form.select :potential_funding_source, options_for_select(POTENTIAL_FUNDING_SOURCES, protocol.potential_funding_source), { include_blank: t(:protocols)[:prompts][:potential_source] }, class: 'selectpicker'
 
     .form-group.row
-      = form.label :brief_description, t(:protocols)[:projects][:information][:description], class: "col-lg-2 control-label"
+      = form.label :brief_description, t(:protocols)[:projects][:information][:brief_description], class: "col-lg-2 control-label"
       .col-sm-8
         = form.text_area :brief_description, {class: 'form-control', rows: "6"}
     
     - if USE_INDIRECT_COST
       .form-group.row.indirect_cost_rate
-        = form.label :indirect_cost_rate, t(:protocols)[:projects][:information][:rate], class: 'col-lg-2 control-label'
+        = form.label :indirect_cost_rate, t(:protocols)[:projects][:information][:indirect_cost_rate], class: 'col-lg-2 control-label'
         .col-lg-10
           = form.text_field :indirect_cost_rate, class: 'form-control'

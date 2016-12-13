@@ -169,7 +169,7 @@ en:
         header: "Recently Saved Filters"
         modal:
           header: "Choose a name for your search."
-          name: "Name"
+          search_name: "Name"
 
     ###############
     #  PROTOCOLS  #

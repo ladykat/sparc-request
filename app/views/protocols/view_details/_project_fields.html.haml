@@ -53,7 +53,7 @@
 
     .form-group.row
       %label.col-lg-4
-        = t(:protocols)[:projects][:information][:description]
+        = t(:protocols)[:projects][:information][:brief_description]
       .col-lg-8
         = protocol.brief_description
 
@@ -61,6 +61,6 @@
     - if USE_INDIRECT_COST
       .form-group.row
         %label.col-lg-4
-          = t(:protocols)[:projects][:information][:rate]
+          = t(:protocols)[:projects][:information][:indirect_cost_rate]
         .col-lg-8
           = protocol.indirect_cost_rate

@@ -27,14 +27,14 @@
       = t(:protocols)[:studies][:information][:subtext]
   .panel-body.container-fluid
     .form-group.row
-      = form.label :short_title, t(:protocols)[:studies][:information][:short_title], class: 'col-lg-2 control-label required'
+      = form.label :short_title, class: 'required'
       .col-lg-10
         = form.text_field :short_title, class: 'form-control'
 
     .form-group.row
       = form.label :title, t(:protocols)[:studies][:information][:title], class: 'col-lg-2 control-label required'
       .col-lg-10
-        = form.text_field :title, class: 'form-control'
+        = form.text_field :title
 
     .form-group.row#funding-status
       = form.label :funding_status, t(:protocols)[:studies][:information][:funding_status], class: 'col-lg-2 control-label required'
@@ -55,14 +55,14 @@
     .form-group.row.funding_status_dependent.funding_source_dependent.internal{ display_if(protocol.funding_source, "internal") }
       = form.label :funding_source_other, t(:protocols)[:studies][:information][:funding_source_internal], class: 'col-lg-2 control-label required'
       .col-lg-10
-        = form.text_field :funding_source_other, class: 'form-control'
+        = form.text_field :funding_source_other
 
     / Federal selected begin
     .funding_status_dependent.funding_source_dependent.federal{ display_if(protocol.funding_source, "federal") }
       .form-group.row
         = form.label :federal_grant_title, t(:protocols)[:studies][:information][:funding_source_federal][:federal_grant_title], class: 'col-lg-2 control-label'
         .col-lg-10
-          = form.text_field :federal_grant_title, class: 'form-control'
+          = form.text_field :federal_grant_title
 
       .form-group.row
         = form.label :federal_grant_code_id, t(:protocols)[:studies][:information][:funding_source_federal][:code], class: 'col-lg-2 control-label'
@@ -80,20 +80,20 @@
             = t(:protocols)[:studies][:information][:funding_source_federal][:separator]
 
       .form-group.row#federal-non-phs
-        = form.label :federal_non_phs_sponsor, t(:protocols)[:studies][:information][:funding_source_federal][:non_phs_sponsor], class: 'col-lg-2 control-label'
+        = form.label :federal_non_phs_sponsor, t(:protocols)[:studies][:information][:funding_source_federal][:non_phs_sponsor]
         .col-lg-10
           = form.select :federal_non_phs_sponsor, options_for_select(FEDERAL_GRANT_NON_PHS_SPONSORS, protocol.federal_non_phs_sponsor), { include_blank: t(:protocols)[:prompts][:federal_sponsor] }, class: 'selectpicker'
 
       .form-group.row
-        = form.label :federal_grant_serial_number, t(:protocols)[:studies][:information][:funding_source_federal][:serial_number], class: 'col-lg-2 control-label'
+        = form.label :federal_grant_serial_number, t(:protocols)[:studies][:information][:funding_source_federal][:serial_number]
         .col-lg-10
-          = form.text_field :federal_grant_serial_number, class: 'form-control'
+          = form.text_field :federal_grant_serial_number
     / Federal selected end
 
     .form-group.row
       = form.label :sponsor_name, t(:protocols)[:studies][:information][:sponsor], class: 'col-lg-2 control-label required'
       .col-lg-10
-        = form.text_field :sponsor_name, class: 'form-control'
+        = form.text_field :sponsor_name
     - if USE_EPIC
       = render partial: 'protocols/form/study_form_sections/interactive_form', locals: { protocol: protocol, form: form }
     = render partial: 'protocols/form/study_form_sections/study_type_note', locals: { protocol: protocol, form: form }

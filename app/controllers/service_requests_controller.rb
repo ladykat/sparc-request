@@ -34,8 +34,8 @@ class ServiceRequestsController < ApplicationController
   def show
     @protocol = @service_request.protocol
     @admin_offset = params[:admin_offset]
-    @service_list_true = @service_request.service_list(true)
-    @service_list_false = @service_request.service_list(false)
+    @service_list_otf = @service_request.service_list(true)
+    @service_list_pppv = @service_request.service_list(false)
     @line_items = @service_request.line_items
 
 
@@ -522,8 +522,8 @@ class ServiceRequestsController < ApplicationController
     # Does an approval need to be created?  Check that the user
     # submitting has approve rights.
     audit_report = request_amendment ? service_request.audit_report(current_user, service_request.previous_submitted_at.utc, Time.now.utc) : nil
-    @service_list_false = service_request.service_list(false)
-    @service_list_true = service_request.service_list(true)
+    @service_list_pppv = service_request.service_list(false)
+    @service_list_otf = service_request.service_list(true)
     @line_items = @service_request.line_items
 
     xls = render_to_string action: 'show', formats: [:xlsx]
@@ -553,8 +553,8 @@ class ServiceRequestsController < ApplicationController
 
       audit_report = request_amendment ? audit_report = sub_service_request.audit_report(current_user, sub_service_request.service_request.previous_submitted_at.utc, Time.now.utc) : nil
       sub_service_request.organization.submission_emails_lookup.each do |submission_email|
-        @service_list_false = sub_service_request.service_request.service_list(false, nil, sub_service_request)
-        @service_list_true = sub_service_request.service_request.service_list(true, nil, sub_service_request)
+        @service_list_pppv = sub_service_request.service_request.service_list(false, nil, sub_service_request)
+        @service_list_otf = sub_service_request.service_request.service_list(true, nil, sub_service_request)
         @line_items = sub_service_request.line_items
         xls = render_to_string action: 'show', formats: [:xlsx]
         Notifier.notify_admin(submission_email.email, xls, current_user, sub_service_request, audit_report).deliver
@@ -597,8 +597,8 @@ class ServiceRequestsController < ApplicationController
 
   def send_individual_service_provider_notification(sub_service_request, service_provider, audit_report=nil, ssr_destroyed=false, request_amendment=false)
     attachments = {}
-    @service_list_true = @service_request.service_list(true, service_provider)
-    @service_list_false = @service_request.service_list(false, service_provider)
+    @service_list_otf = @service_request.service_list(true, service_provider)
+    @service_list_pppv = @service_request.service_list(false, service_provider)
 
     # Retrieves the valid line items for service provider to calculate total direct cost in the xls
     line_items = []

@@ -42,7 +42,7 @@ wb.add_worksheet(name: "Review") do |sheet|
   sheet.add_row ["Authorized Users"], :style => header_style
   proxy_row = ["Name", "Role", "", "Proxy Rights"]
 
-  has_per_patient_per_visit_services = !@service_list_false.empty?
+  has_per_patient_per_visit_services = !@service_list_pppv.empty?
 
   visit_count = 0
   if has_per_patient_per_visit_services
@@ -132,7 +132,7 @@ wb.add_worksheet(name: "Review") do |sheet|
 
       sheet.add_row(r_t_row, :style => centered)
 
-      @service_list_false.each do |key, value|
+      @service_list_pppv.each do |key, value|
         next if @sub_service_request.present? && @sub_service_request.organization.name != value[:process_ssr_organization_name]
 
         services_sub_header_rows << sheet.add_row([value[:name]], :style => sub_header_style)
@@ -202,7 +202,7 @@ wb.add_worksheet(name: "Review") do |sheet|
   service_rows = []
   services_sub_header_rows = []
   services_sub_header_rows << sheet.add_row(['Other Services'], :style => name_header_style)
-  @service_list_true.each do |key, value|
+  @service_list_otf.each do |key, value|
     next unless @sub_service_request.nil? or @sub_service_request.organization.name == value[:process_ssr_organization_name]
     services_sub_header_rows << sheet.add_row([value[:name]], :style => sub_header_style)
     line_items = @sub_service_request.nil? ? value[:line_items] : @sub_service_request.one_time_fee_line_items
@@ -217,7 +217,7 @@ wb.add_worksheet(name: "Review") do |sheet|
         line_item.pricing_scheme = 'displayed'
       end
 
-      if !@service_list_true.empty? && !@service_list_false.empty?
+      if !@service_list_otf.empty? && !@service_list_pppv.empty?
         service_row += [display_your_cost(line_item), ""]
       else
         service_row += [display_your_cost(line_item), "", ""]

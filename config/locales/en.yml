@@ -233,10 +233,10 @@ en:
       uploaded: "Uploaded"
       shared_with: "Service Provider Access"
     form_fields:
-      document_type: "Document Type:"
-      specify_doc_type: "Please Specify:"
+      doc_type: "Document Type:"
+      doc_type_other: "Please Specify:"
       document: "Document:"
-      access: "Allow Access:"
+      org_ids: "Allow Access:"
     select_type: "Please Select Type"
     delete_confirm: "Are you sure you want to delete the selected Document from this protocol?"
 

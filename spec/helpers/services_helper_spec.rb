@@ -72,4 +72,45 @@ RSpec.describe CatalogManager::ServicesHelper do
       expect(display_service_user_rights(user, form_name, institution)).to eq "Sorry, you are not allowed to access this page.Please contact your system administrator."
     end
   end
+
+  describe '#per_patient_display_style' do
+    context 'PricingMap is associated with a one time fee Service' do
+      it "should return 'display:none;'" do
+        service = create(:service_with_pricing_map, one_time_fee: true)
+        expect(per_patient_display_style(service.pricing_maps.first)).to eq("display:none;")
+      end
+    end
+
+    context 'PricingMap is associated with a per patient per visit Service' do
+      it "should return empty string" do
+        service = create(:service_with_pricing_map, one_time_fee: false)
+        expect(per_patient_display_style(service.pricing_maps.first)).to eq("")
+      end
+    end
+  end
+
+  describe "#display_otf_attributes" do
+    context "PricingMap is associated with per patient per visit Service" do
+      it "should return empty string" do
+        service = create(:service_with_pricing_map, one_time_fee: false)
+        expect(display_otf_attributes(service.pricing_maps.first)).to eq("")
+      end
+    end
+
+    context "PricingMap is associated with one time fee Service with N/A otf_unit_type" do
+      it "should return #<quantity_type>" do
+        service = create(:service_with_pricing_map, one_time_fee: true)
+        service.pricing_maps.first.update(otf_unit_type: "N/A", quantity_type: "Hourly")
+        expect(display_otf_attributes(service.pricing_maps.first)).to eq("#Hourly")
+      end
+    end
+
+    context "PricingMap is associated with one time fee Service with non-N/A otf_unit_type" do
+      it "should return #<otf_unit_type>/#<quantity_type>" do
+        service = create(:service_with_pricing_map, one_time_fee: true)
+        service.pricing_maps.first.update(otf_unit_type: "Each", quantity_type: "Hourly")
+        expect(display_otf_attributes(service.pricing_maps.first)).to eq("#Each/#Hourly")
+      end
+    end
+  end
 end

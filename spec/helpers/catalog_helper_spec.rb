@@ -23,56 +23,74 @@ require 'rails_helper'
 RSpec.describe CatalogManager::CatalogHelper do
 
   context '#disable_pricing_setup' do
-    it "should return whether or not it can edit a pricing setup based on date" do
-      pricing_setup = create(:pricing_setup)
-      expect(helper.disable_pricing_setup(pricing_setup, true)).to eq(false)
+    context 'can edit historical data' do
+      it "should return false when display_date and effective_date in the past" do
+        pricing_setup = create(:pricing_setup)
+        expect(helper.disable_pricing_setup(pricing_setup, true)).to eq(false)
+      end
+
+      it "should return false when display_date in the future" do
+        pricing_setup = create(:pricing_setup, display_date: Date.today + 1)
+        expect(helper.disable_pricing_setup(pricing_setup, true)).to eq(false)
+      end
+
+      it "should return false when effective_date in the future" do
+        pricing_setup = create(:pricing_setup, effective_date: Date.today + 1)
+        expect(helper.disable_pricing_setup(pricing_setup, true)).to eq(false)
+      end
     end
 
-    it "should return whether or not it can edit a pricing setup based on date" do
-      pricing_setup = create(:pricing_setup, display_date: Date.parse('2018-01-01'))
-      expect(helper.disable_pricing_setup(pricing_setup, true)).to eq(false)
-    end
+    context 'cannot edit historical data' do
+      it "should return true when display date is in the future" do
+        pricing_setup = create(:pricing_setup, display_date: Date.today + 1)
+        expect(helper.disable_pricing_setup(pricing_setup, false)).to eq(true)
+      end
 
-    it "should return whether or not it can edit a pricing setup based on date" do
-      pricing_setup = create(:pricing_setup, display_date: Date.parse('2018-01-01'))
-      expect(helper.disable_pricing_setup(pricing_setup, false)).to eq(true)
-    end
+      it "should return true when effective date is in the future" do
+        pricing_setup = create(:pricing_setup, effective_date: Date.today + 1)
+        expect(helper.disable_pricing_setup(pricing_setup, false)).to eq(true)
+      end
 
-    it "should return whether or not it can edit a pricing setup based on date" do
-      pricing_setup = create(:pricing_setup, effective_date: Date.parse('2018-01-01'))
-      expect(helper.disable_pricing_setup(pricing_setup, true)).to eq(false)
-    end
-
-    it "should return whether or not it can edit a pricing setup based on date" do
-      pricing_setup = create(:pricing_setup, effective_date: Date.parse('2018-01-01'))
-      expect(helper.disable_pricing_setup(pricing_setup, false)).to eq(true)
+      it "should return false when display date and effective date in the future" do
+        pricing_setup = create(:pricing_setup, effective_date: Date.today + 1, display_date: Date.today + 1)
+        expect(helper.disable_pricing_setup(pricing_setup, false)).to eq(false)
+      end
     end
   end
 
   context '#disable_pricing_map' do
-    it "should return whether or not it can edit a pricing map based on date" do
-      pricing_map = create(:pricing_map)
-      expect(helper.disable_pricing_map(pricing_map, true)).to eq(false)
+    context 'can edit historical data' do
+      it "should return false when display_date and effective_date in the past" do
+        pricing_map = create(:pricing_map)
+        expect(helper.disable_pricing_map(pricing_map, true)).to eq(false)
+      end
+
+      it "should return false when display_date in the future" do
+        pricing_map = create(:pricing_map, display_date: Date.today + 1)
+        expect(helper.disable_pricing_map(pricing_map, true)).to eq(false)
+      end
+
+      it "should return false when effective_date in the future" do
+        pricing_map = create(:pricing_map, effective_date: Date.today + 1)
+        expect(helper.disable_pricing_map(pricing_map, true)).to eq(false)
+      end
     end
 
-    it "should return whether or not it can edit a pricing map based on date" do
-      pricing_map = create(:pricing_map, display_date: Date.parse('2018-01-01'))
-      expect(helper.disable_pricing_map(pricing_map, true)).to eq(false)
-    end
+    context 'cannot edit historical data' do
+      it "should return true when display date is in the future" do
+        pricing_map = create(:pricing_map, display_date: Date.today + 1)
+        expect(helper.disable_pricing_map(pricing_map, false)).to eq(true)
+      end
 
-    it "should return whether or not it can edit a pricing map based on date" do
-      pricing_map = create(:pricing_map, display_date: Date.parse('2018-01-01'))
-      expect(helper.disable_pricing_map(pricing_map, false)).to eq(true)
-    end
+      it "should return true when effective date is in the future" do
+        pricing_map = create(:pricing_map, effective_date: Date.today + 1)
+        expect(helper.disable_pricing_map(pricing_map, false)).to eq(true)
+      end
 
-    it "should return whether or not it can edit a pricing map based on date" do
-      pricing_map = create(:pricing_setup, effective_date: Date.parse('2018-01-01'))
-      expect(helper.disable_pricing_map(pricing_map, true)).to eq(false)
-    end
-
-    it "should return whether or not it can edit a pricing map based on date" do
-      pricing_map = create(:pricing_map, effective_date: Date.parse('2018-01-01'))
-      expect(helper.disable_pricing_map(pricing_map, false)).to eq(true)
+      it "should return false when display date and effective date in the future" do
+        pricing_map = create(:pricing_map, effective_date: Date.today + 1, display_date: Date.today + 1)
+        expect(helper.disable_pricing_map(pricing_map, false)).to eq(false)
+      end
     end
   end
 

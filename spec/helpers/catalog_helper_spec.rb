@@ -22,7 +22,7 @@ require 'rails_helper'
 
 RSpec.describe CatalogManager::CatalogHelper do
 
-  context '#disable_pricing_setup' do
+  describe '#disable_pricing_setup' do
     context 'can edit historical data' do
       it "should return false when display_date and effective_date in the past" do
         pricing_setup = create(:pricing_setup)
@@ -58,7 +58,7 @@ RSpec.describe CatalogManager::CatalogHelper do
     end
   end
 
-  context '#disable_pricing_map' do
+  describe '#disable_pricing_map' do
     context 'can edit historical data' do
       it "should return false when display_date and effective_date in the past" do
         pricing_map = create(:pricing_map)
@@ -94,7 +94,7 @@ RSpec.describe CatalogManager::CatalogHelper do
     end
   end
 
-  context '#disabled_parent' do
+  describe '#disabled_parent' do
     it 'should return the name of the highest disabled organization in the tree' do
       institution = create(:institution, name: 'Institution', is_available: true)
       provider    = create(:provider, name: 'Provider', parent_id: institution.id, is_available: false)

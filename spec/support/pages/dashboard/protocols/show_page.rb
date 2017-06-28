@@ -29,6 +29,7 @@ module Dashboard
       section :protocol_summary, '#protocol_show_information_panel' do
         element :study_notes_button, 'button', text: 'Study Notes'
         element :edit_study_info_button, 'button', text: 'Edit Study Information'
+        element :edit_project_info_button, 'button', text: 'Edit Project Information'
       end
 
       section :index_notes_modal, Dashboard::Notes::IndexModal, '#notes-modal'

@@ -44,7 +44,17 @@ RSpec.describe 'User changes protocol type', js: true do
       page = Dashboard::Protocols::ShowPage.new
       page.load(id: @protocol.id)
       wait_for_javascript_to_finish
+      page.protocol_summary.edit_project_info_button.click
+      page.protocol_type.protocol_type_dropdown.click
+      page.protocol_type.dropdown_choices(text: /\AStudy\Z/).first.click
+      page.protocol_type.change_type_button.click
+      wait_for_javascript_to_finish
       sos
+        # wait_for_dropdown_choices
+        # dropdown_choices(text: /\AStudy\Z/).first.click
+        # wait_until_dropdown_choices_invisible
+        # change_type_button.click
+        # sos
     end
   end
 end

@@ -44,6 +44,21 @@ RSpec.describe 'User creates study', js: true do
   end
 
   context 'Using Epic' do
+    before :each do
+      stub_const("USE_EPIC", true)
+    end
+
+    context 'selects "Yes" for "Publish Study in Epic"' do
+      scenario 'should show study type questions as required' do
+        visit_create_study_form
+        wait_for_javascript_to_finish
+        expect(page).to have_selector('.required', text: 'Publish Study in Epic', visible: true)
+        find('#study_selected_for_epic_true_button').click
+        wait_for_javascript_to_finish
+        expect(page).to have_selector('.question-label', text: 'Study Type Questions', visible: true, class: 'required')
+      end
+    end
+
     context 'selects "Publish Study in Epic" and selects answers that give study_type 1' do
       scenario 'should show note for study_type 1' do
         visit_create_study_form
@@ -78,6 +93,16 @@ RSpec.describe 'User creates study', js: true do
     end
 
     context 'selects "No" to "Publish Study in Epic"' do
+
+      it 'should show study type questions as required' do
+        visit_create_study_form
+        wait_for_javascript_to_finish
+        expect(page).to have_selector('.required', text: 'Publish Study in Epic', visible: true)
+        find('#study_selected_for_epic_false_button').click
+        wait_for_javascript_to_finish
+        expect(page).not_to have_selector('.question-label', text: 'Study Type Questions', visible: true, class: 'required')
+      end
+
       it 'should show questions without Epic language' do
         visit_create_study_form
         wait_for_javascript_to_finish
@@ -101,6 +126,12 @@ RSpec.describe 'User creates study', js: true do
       stub_const("USE_EPIC", false)
       visit_create_study_form
       wait_for_javascript_to_finish
+    end
+
+    it 'should not show study type questions as required' do
+      expect(page).not_to have_selector('.required', text: 'Publish Study in Epic', visible: true)
+      expect(page).not_to have_selector('.question-label', text: 'Study Type Questions', visible: true, class: 'required')
+      expect(page).to have_selector('.question-label', text: 'Study Type Questions', visible: true)
     end
 
     it 'defaults to the "No" answer for the epic question' do

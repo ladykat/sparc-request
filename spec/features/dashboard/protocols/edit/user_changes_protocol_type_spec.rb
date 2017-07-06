@@ -35,11 +35,15 @@ RSpec.describe 'User changes protocol type', js: true do
     ssr         = create(:sub_service_request_without_validations, service_request: @sr, organization: program, status: 'first_draft')
                   create(:line_item, service_request: @sr, sub_service_request: ssr, service: service)
     
-    StudyTypeQuestionGroup.create(active: 1)
     stub_const("RESEARCH_MASTER_ENABLED", false)
   end
 
   context 'and clicks Edit Information' do
+    build_study_type_question_groups
+    before(:each) do
+      @protocol.update_attributes(study_type_question_group_id: study_type_question_group_version_1.id, selected_for_epic: nil)
+    end
+
     it 'and sees the edit page' do
       page = Dashboard::Protocols::ShowPage.new
       page.load(id: @protocol.id)

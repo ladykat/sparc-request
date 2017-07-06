@@ -46,37 +46,58 @@ RSpec.describe Dashboard::ProtocolsController do
       end
 
       context "user authorized to edit Protocol" do
-        before(:each) do
-          @logged_in_user = build_stubbed(:identity)
-          log_in_dashboard_identity(obj: @logged_in_user)
-          @study_type_question_group_version_3 = StudyTypeQuestionGroup.create(active: true, version: 3)
-          study_type_question_group_version_2 = StudyTypeQuestionGroup.create(active: false, version: 2)
-          @protocol = findable_stub(Protocol) do
-            stub = build_stubbed(:protocol, type: "Study", study_type_question_group_id: study_type_question_group_version_2.id)
-            allow(stub).to receive(:becomes).and_return(stub)
-            stub
+        context "change type from 'Study' to 'Project'" do
+          before(:each) do
+            @logged_in_user = build_stubbed(:identity)
+            log_in_dashboard_identity(obj: @logged_in_user)
+            @study_type_question_group_version_3 = StudyTypeQuestionGroup.create(active: true, version: 3)
+            study_type_question_group_version_2 = StudyTypeQuestionGroup.create(active: false, version: 2)
+            @protocol = findable_stub(Protocol) do
+              stub = build_stubbed(:protocol, type: "Study", study_type_question_group_id: study_type_question_group_version_2.id)
+              allow(stub).to receive(:becomes).and_return(stub)
+              stub
+            end
+            allow(@protocol).to receive(:update_attribute)
+            allow(@protocol).to receive(:populate_for_edit)
+            authorize(@logged_in_user, @protocol, can_edit: true)
+
+            xhr :patch, :update_protocol_type, id: @protocol.id, type: "Project"
           end
-          allow(@protocol).to receive(:update_attribute)
-          allow(@protocol).to receive(:populate_for_edit)
-          authorize(@logged_in_user, @protocol, can_edit: true)
 
-          xhr :patch, :update_protocol_type, id: @protocol.id, type: "Project"
+          it 'should set protocol_type' do
+            expect(@protocol.type).to eq("Project")
+          end
+
+          it 'should set study_type_question_group to active' do
+            expect(@protocol.study_type_question_group_id).to eq(@study_type_question_group_version_3.id)
+          end
+
+          it 'should populate Protocol for edit' do
+            expect(@protocol.study_type_question_group_id).to eq(@study_type_question_group_version_3.id)
+          end
+
+          it { is_expected.to render_template "dashboard/protocols/update_protocol_type" }
+          it { is_expected.to respond_with :ok }
         end
 
-        it 'should set protocol_type' do
-          expect(@protocol.type).to eq("Project")
-        end
+        context "change type from 'Project' to 'Study'" do
+          before(:each) do
+            @logged_in_user = build_stubbed(:identity)
+            log_in_dashboard_identity(obj: @logged_in_user)
+            @study_type_question_group_version_3 = StudyTypeQuestionGroup.create(active: true, version: 3)
+            study_type_question_group_version_2 = StudyTypeQuestionGroup.create(active: false, version: 2)
+            @protocol = findable_stub(Protocol) do
+              stub = build_stubbed(:protocol, type: "Project", study_type_question_group_id: study_type_question_group_version_2.id, selected_for_epic: nil)
+              allow(stub).to receive(:becomes).and_return(stub)
+              stub
+            end
+            allow(@protocol).to receive(:update_attribute)
+            allow(@protocol).to receive(:populate_for_edit)
+            authorize(@logged_in_user, @protocol, can_edit: true)
 
-        it 'should set study_type_question_group to active' do
-          expect(@protocol.study_type_question_group_id).to eq(@study_type_question_group_version_3.id)
+            xhr :patch, :update_protocol_type, id: @protocol.id, type: "Study"
+          end
         end
-
-        it 'should populate Protocol for edit' do
-          expect(@protocol.study_type_question_group_id).to eq(@study_type_question_group_version_3.id)
-        end
-
-        it { is_expected.to render_template "dashboard/protocols/update_protocol_type" }
-        it { is_expected.to respond_with :ok }
       end
     end
 

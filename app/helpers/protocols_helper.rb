@@ -20,11 +20,10 @@
 
 module ProtocolsHelper
   def display_study_type_question?(protocol, study_type_answer)
-    to_display = 
-      if !USE_EPIC || protocol.selected_for_epic == false
-        ['certificate_of_conf_no_epic', 'higher_level_of_privacy_no_epic'].include?(study_type_answer.study_type_question.friendly_id) && study_type_answer.answer != nil
-      else
-        !['certificate_of_conf_no_epic', 'higher_level_of_privacy_no_epic'].include?(study_type_answer.study_type_question.friendly_id) && study_type_answer.answer != nil
-      end
+    if !USE_EPIC || protocol.selected_for_epic == false
+      ['certificate_of_conf_no_epic', 'higher_level_of_privacy_no_epic'].include?(study_type_answer.study_type_question.friendly_id)
+    else
+      !['certificate_of_conf_no_epic', 'higher_level_of_privacy_no_epic'].include?(study_type_answer.study_type_question.friendly_id) && study_type_answer.answer != nil
+    end
   end
 end

@@ -91,6 +91,17 @@ FactoryGirl.define do
       end
     end
 
+    trait :with_sub_service_request_without_validations do
+      after(:create) do |protocol, evaluator|
+        service_request = create(:service_request_without_validations, protocol: protocol)
+
+        SubServiceRequest.skip_callback(:save, :after, :update_org_tree)
+        sub_service_request = build(:sub_service_request_without_validations, service_request: service_request)
+        sub_service_request.save validate: false
+        SubServiceRequest.set_callback(:save, :after, :update_org_tree)
+      end
+    end
+
     transient do
       project_role_count 1
       pi nil
@@ -117,5 +128,6 @@ FactoryGirl.define do
     factory :archived_project_without_validations,      traits: [:without_validations, :project, :archived]
     factory :protocol_federally_funded,                 traits: [:funded, :federal]
     factory :protocol_with_sub_service_request_in_cwf,  traits: [:with_sub_service_request_in_cwf, :funded, :federal]
+    factory :protocol_with_ssr_without_validations,     traits: [:without_validations, :with_sub_service_request_without_validations]
   end
 end

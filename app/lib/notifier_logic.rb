@@ -28,10 +28,14 @@ class NotifierLogic
     @ssrs_updated_from_un_updatable_status = ssrs_that_have_been_updated_from_a_un_updatable_status
   end
 
-  def ssr_deletion_emails(ssr, ssr_destroyed: true, request_amendment: false)
+  def ssr_deletion_emails(ssr, ssr_destroyed: true, request_amendment: false, admin_destroy_ssr: false)
     if @ssrs_updated_from_un_updatable_status.present?
       send_ssr_service_provider_notifications(ssr, ssr_destroyed: true, request_amendment: false)
       send_admin_notifications([ssr], request_amendment: false, ssr_destroyed: true)
+    elsif admin_destroy_ssr
+      send_ssr_service_provider_notifications(ssr, ssr_destroyed: true, request_amendment: false)
+      send_admin_notifications([ssr], request_amendment: false, ssr_destroyed: true)
+      send_user_notifications(request_amendment: true, admin_destroy_ssr: true)
     end
   end
 
@@ -56,7 +60,7 @@ class NotifierLogic
     if @sub_service_request
       to_notify = @sub_service_request.update_status_and_notify('get_a_cost_estimate')
       if to_notify.include?(@sub_service_request.id)
-        send_user_notifications(request_amendment: false)
+        send_user_notifications(request_amendment: false, admin_destroy_ssr: false)
         send_admin_notifications([@sub_service_request], request_amendment: false)
         send_service_provider_notifications([@sub_service_request], request_amendment: false)
       end
@@ -64,7 +68,7 @@ class NotifierLogic
       to_notify = @service_request.update_status('get_a_cost_estimate')
       sub_service_requests = @service_request.sub_service_requests.where(id: to_notify)
       if !sub_service_requests.empty? # if nothing is set to notify then we shouldn't send out e-mails
-        send_user_notifications(request_amendment: false)
+        send_user_notifications(request_amendment: false, admin_destroy_ssr: false)
         send_admin_notifications(sub_service_requests, request_amendment: false)
         send_service_provider_notifications(sub_service_requests, request_amendment: false)
       end
@@ -124,7 +128,7 @@ class NotifierLogic
 
   def send_request_amendment_email_evaluation
     if @ssrs_updated_from_un_updatable_status.present? || @destroyed_ssrs_needing_notification.present? || @created_ssrs_needing_notification.present?
-      send_user_notifications(request_amendment: true)
+      send_user_notifications(request_amendment: true, admin_destroy_ssr: false)
     end
     
     if @ssrs_updated_from_un_updatable_status.present?
@@ -136,12 +140,12 @@ class NotifierLogic
   def send_notifications(sub_service_requests)
     # If user has added a new service related to a new ssr and edited an existing ssr,
     # we only want to send a request amendment email and not an initial submit email
-    send_user_notifications(request_amendment: false) unless @send_request_amendment_and_not_initial
+    send_user_notifications(request_amendment: false, admin_destroy_ssr: false) unless @send_request_amendment_and_not_initial
     send_admin_notifications(sub_service_requests, request_amendment: false)
     send_service_provider_notifications(sub_service_requests, request_amendment: false)
   end
 
-  def send_user_notifications(request_amendment: false)
+  def send_user_notifications(request_amendment: false, admin_destroy_ssr: false)
     # Does an approval need to be created?  Check that the user
     # submitting has approve rights.
     individual_ssr = @sub_service_request.present? ? true : false
@@ -168,9 +172,9 @@ class NotifierLogic
       # Do not want to send authorized user request amendment emails when audit_report is not present
       
       if request_amendment && audit_report.present?
-        Notifier.delay.notify_user(project_role, @service_request, @sub_service_request, approval, @current_user, audit_report, individual_ssr)
+        Notifier.delay.notify_user(project_role, @service_request, @sub_service_request, approval, @current_user, audit_report, individual_ssr, admin_destroy_ssr)
       elsif !request_amendment
-        Notifier.delay.notify_user(project_role, @service_request, @sub_service_request, approval, @current_user, audit_report, individual_ssr)
+        Notifier.delay.notify_user(project_role, @service_request, @sub_service_request, approval, @current_user, audit_report, individual_ssr, admin_destroy_ssr)
       end
     end
   end

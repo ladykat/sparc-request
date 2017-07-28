@@ -34,7 +34,7 @@ class Notifier < ActionMailer::Base
     mail(:to => email, :cc => cc, :from => @identity.email, :subject => subject)
   end
 
-  def notify_user(project_role, service_request, ssr, approval, user_current, audit_report=nil, individual_ssr=false)
+  def notify_user(project_role, service_request, ssr, approval, user_current, audit_report=nil, individual_ssr=false, admin_destroy_ssr=false)
 
     @protocol = service_request.protocol
     @service_request = service_request
@@ -46,14 +46,8 @@ class Notifier < ActionMailer::Base
 
     xls = controller.render_to_string action: 'show', formats: [:xlsx]
     ### END ATTACHMENTS ###
-    
-    if audit_report.present?
-      @status = 'request_amendment'
-    elsif individual_ssr
-      @status = ssr.status
-    else
-      @status = @service_request.status
-    end
+
+    @status = status(admin_destroy_ssr, audit_report.present?, individual_ssr, ssr, @service_request)
 
     @notes = []
     @identity = project_role.identity

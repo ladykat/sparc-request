@@ -56,7 +56,7 @@ class Dashboard::ProtocolsController < Dashboard::BaseController
     @protocols        = @filterrific.find.page(params[:page])
     @admin_protocols  = Protocol.for_admin(@user.id).pluck(:id)
     @protocol_filters = ProtocolFilter.latest_for_user(@user.id, ProtocolFilter::MAX_FILTERS)
-    
+
     #toggles the display of the navigation bar, instead of breadcrumbs
     @show_navbar      = true
     @show_messages    = true
@@ -198,7 +198,7 @@ class Dashboard::ProtocolsController < Dashboard::BaseController
   def archive
     @protocol.toggle!(:archived)
     @protocol_type = @protocol.type
-    @permission_to_edit = @authorization.present? ? @authorization.can_edit? : false
+    @permission_to_edit = params[:permission_to_edit]
     respond_to do |format|
       format.js
     end

@@ -31,11 +31,9 @@ class NotifierLogic
   def ssr_deletion_emails(deleted_ssr: nil, ssr_destroyed: true, request_amendment: false, admin_delete_ssr: false)
     if admin_delete_ssr
       send_user_notifications(request_amendment: false, admin_delete_ssr: true, deleted_ssr: deleted_ssr)
-      send_ssr_service_provider_notifications(deleted_ssr, ssr_destroyed: true, request_amendment: false)
-      send_admin_notifications([deleted_ssr], request_amendment: false, ssr_destroyed: true)
+      send_admin_and_service_provider_notifications([deleted_ssr], request_amendment: false, ssr_destroyed: true)
     elsif @ssrs_updated_from_un_updatable_status.present?
-      send_ssr_service_provider_notifications(deleted_ssr, ssr_destroyed: true, request_amendment: false)
-      send_admin_notifications([deleted_ssr], request_amendment: false, ssr_destroyed: true)
+      send_admin_and_service_provider_notifications([deleted_ssr], request_amendment: false, ssr_destroyed: true)
     end
   end
 
@@ -61,38 +59,109 @@ class NotifierLogic
       to_notify = @sub_service_request.update_status_and_notify('get_a_cost_estimate')
       if to_notify.include?(@sub_service_request.id)
         send_user_notifications(request_amendment: false, admin_delete_ssr: false, deleted_ssr: nil)
-        send_admin_notifications([@sub_service_request], request_amendment: false)
-        send_service_provider_notifications([@sub_service_request], request_amendment: false)
+        send_admin_and_service_provider_notifications([@sub_service_request], request_amendment: false)
       end
     else
       to_notify = @service_request.update_status('get_a_cost_estimate')
       sub_service_requests = @service_request.sub_service_requests.where(id: to_notify)
       if !sub_service_requests.empty? # if nothing is set to notify then we shouldn't send out e-mails
         send_user_notifications(request_amendment: false, admin_delete_ssr: false, deleted_ssr: nil)
-        send_admin_notifications(sub_service_requests, request_amendment: false)
-        send_service_provider_notifications(sub_service_requests, request_amendment: false)
+        send_admin_and_service_provider_notifications(sub_service_requests, request_amendment: false)
       end
     end
   end
 
-  def send_ssr_service_provider_notifications(sub_service_request, ssr_destroyed: false, request_amendment: false)
-    audit_report = request_amendment ? sub_service_request.audit_line_items(@current_user) : nil
-    sub_service_request.organization.service_providers.where("(`service_providers`.`hold_emails` != 1 OR `service_providers`.`hold_emails` IS NULL)").each do |service_provider|
-      send_individual_service_provider_notification(sub_service_request, service_provider, audit_report, ssr_destroyed, request_amendment)
-    end
-  end
+  # def send_service_provider_notifications(sub_service_requests, request_amendment: false)
+  #   sub_service_requests.each do |sub_service_request|
+  #     send_ssr_service_provider_notifications(sub_service_request, ssr_destroyed: false, request_amendment: request_amendment)
+  #   end
+  # end
 
-  def send_admin_notifications(sub_service_requests, request_amendment: false, ssr_destroyed: false)
-    # Iterates through each SSR to find the correct admin email.
-    # Passes the correct SSR to display in the attachment and email.
-    sub_service_requests.each do |sub_service_request|
-      audit_report = request_amendment ? sub_service_request.audit_line_items(@current_user) : nil
-      sub_service_request.organization.submission_emails_lookup.each do |submission_email|
-        individual_ssr = @sub_service_request.present? ? true : false
-        if ssr_destroyed
-          Notifier.notify_admin(submission_email.email, @current_user, sub_service_request, audit_report, ssr_destroyed, individual_ssr).deliver_now
-        else
-          Notifier.delay.notify_admin(submission_email.email, @current_user, sub_service_request, audit_report, ssr_destroyed, individual_ssr)
+  # def send_ssr_service_provider_notifications(sub_service_request, ssr_destroyed: false, request_amendment: false)
+  #   audit_report = request_amendment ? sub_service_request.audit_line_items(@current_user) : nil
+  #   sub_service_request.organization.service_providers.where("(`service_providers`.`hold_emails` != 1 OR `service_providers`.`hold_emails` IS NULL)").each do |service_provider|
+  #     send_individual_service_provider_notification(sub_service_request, service_provider, audit_report, ssr_destroyed, request_amendment)
+  #   end
+  # end
+
+  # def send_individual_service_provider_notification(sub_service_request, service_provider, audit_report=nil, ssr_destroyed=false, request_amendment=false)
+  #   individual_ssr = @sub_service_request.present? ? true : false
+  #   if ssr_destroyed
+  #     Notifier.notify_service_provider(service_provider, @service_request, @current_user, sub_service_request, audit_report, ssr_destroyed, request_amendment, individual_ssr).deliver_now
+  #   else
+  #     Notifier.delay.notify_service_provider(service_provider, @service_request, @current_user, sub_service_request, audit_report, ssr_destroyed, request_amendment, individual_ssr)
+  #   end
+  # end
+
+  # def send_admin_notifications(sub_service_requests, request_amendment: false, ssr_destroyed: false)
+  #   # Iterates through each SSR to find the correct admin email.
+  #   # Passes the correct SSR to display in the attachment and email.
+  #   sub_service_requests.each do |sub_service_request|
+  #     audit_report = request_amendment ? sub_service_request.audit_line_items(@current_user) : nil
+  #     sub_service_request.organization.submission_emails_lookup.each do |submission_email|
+  #       individual_ssr = @sub_service_request.present? ? true : false
+  #       if ssr_destroyed
+  #         Notifier.notify_admin(submission_email.email, @current_user, sub_service_request, audit_report, ssr_destroyed, individual_ssr).deliver_now
+  #       else
+  #         Notifier.delay.notify_admin(submission_email.email, @current_user, sub_service_request, audit_report, ssr_destroyed, individual_ssr)
+  #       end
+  #     end
+  #   end
+  # end
+
+  def send_admin_and_service_provider_notifications(sub_service_requests, request_amendment: false, ssr_destroyed: false)
+    #sub_service_requests = ServiceRequest.last.sub_service_requests
+    # NotifierLogic.new(sub_service_requests.first.service_request, nil, Identity.find(12911)).send_admin_and_service_provider_notifications(sub_service_requests)
+    ssr_sp_email_hash = sub_service_requests.joins(organization: :service_providers).where("(`service_providers`.`hold_emails` != 1 OR `service_providers`.`hold_emails` IS NULL)").map{ |ssr| [ssr, service_providers: ssr.organization.service_providers, emails: ssr.organization.service_providers.map(&:identity).map(&:email)] }.to_h
+    sp_emails = ssr_sp_email_hash.map{|k,v| v[:emails]}.flatten.uniq
+
+    admin_hash = sub_service_requests.map { |ssr| [ssr, emails: ssr.organization.submission_emails_lookup.map(&:email)] }.to_h
+    admin_emails = admin_hash.map{|k,v| v[:emails]}.flatten.uniq
+
+    ssrs_needing_joint_notification = []
+    email_sent_jointly = []
+    admin_hash.each do |admin|
+      ssr_sp_email_hash.each do |sp|
+        admin.last[:emails].each do |admin_email|
+          sp.last[:emails].each do |sp_email|
+            if admin_email == sp_email && admin.first.id != sp.first.id
+              ssrs_needing_joint_notification << admin.first.id
+              ssrs_needing_joint_notification << sp.first.id
+              email_sent_jointly << admin_email
+            end
+          end
+        end
+      end
+    end
+    ssrs_needing_joint_notification = ssrs_needing_joint_notification.uniq
+
+    if ssrs_needing_joint_notification.present?
+      audit_report = authorized_user_audit_report(ssrs_needing_joint_notification)
+      # Need to figure out how to get an audit report for the ssrs_needing_joint_notification since usually you do the audit report 
+      # Notifier.joint_notify_admin_and_service_provider(ssrs_needing_joint_notification)
+    end
+    
+
+    admin_hash.each do |ssr, emails|
+      emails[:emails].each do |email|
+        if !email_sent_jointly.include? email
+          if ssr_destroyed
+            Notifier.notify_admin(email, @current_user, ssr, audit_report, ssr_destroyed, individual_ssr).deliver_now
+          else
+            Notifier.delay.notify_admin(email, @current_user, ssr, audit_report, ssr_destroyed, individual_ssr)
+          end
+        end
+      end
+    end
+
+    ssr_sp_email_hash.each do |ssr, ssr_info|
+      ssr_info[:service_providers].each do |service_provider|
+        if !email_sent_jointly.include? service_provider.identity.email
+          if ssr_destroyed
+            Notifier.notify_service_provider(service_provider, @service_request, @current_user, ssr, audit_report, ssr_destroyed, request_amendment, individual_ssr).deliver_now
+          else
+            Notifier.delay.notify_service_provider(service_provider, @service_request, @current_user, ssr, audit_report, ssr_destroyed, request_amendment, individual_ssr)
+          end
         end
       end
     end
@@ -132,8 +201,7 @@ class NotifierLogic
     end
     
     if @ssrs_updated_from_un_updatable_status.present?
-      send_service_provider_notifications(@ssrs_updated_from_un_updatable_status, request_amendment: true)
-      send_admin_notifications(@ssrs_updated_from_un_updatable_status, request_amendment: true)
+      send_admin_and_service_provider_notifications(@ssrs_updated_from_un_updatable_status, request_amendment: true)
     end
   end
 
@@ -141,8 +209,7 @@ class NotifierLogic
     # If user has added a new service related to a new ssr and edited an existing ssr,
     # we only want to send a request amendment email and not an initial submit email
     send_user_notifications(request_amendment: false, admin_delete_ssr: false, deleted_ssr: nil) unless @send_request_amendment_and_not_initial
-    send_admin_notifications(sub_service_requests, request_amendment: false)
-    send_service_provider_notifications(sub_service_requests, request_amendment: false)
+    send_admin_and_service_provider_notifications(sub_service_requests, request_amendment: false)
   end
 
   def send_user_notifications(request_amendment: false, admin_delete_ssr: false, deleted_ssr: nil)
@@ -181,21 +248,6 @@ class NotifierLogic
     end
   end
 
-  def send_service_provider_notifications(sub_service_requests, request_amendment: false)
-    sub_service_requests.each do |sub_service_request|
-      send_ssr_service_provider_notifications(sub_service_request, ssr_destroyed: false, request_amendment: request_amendment)
-    end
-  end
-
-  def send_individual_service_provider_notification(sub_service_request, service_provider, audit_report=nil, ssr_destroyed=false, request_amendment=false)
-    individual_ssr = @sub_service_request.present? ? true : false
-    if ssr_destroyed
-      Notifier.notify_service_provider(service_provider, @service_request, @current_user, sub_service_request, audit_report, ssr_destroyed, request_amendment, individual_ssr).deliver_now
-    else
-      Notifier.delay.notify_service_provider(service_provider, @service_request, @current_user, sub_service_request, audit_report, ssr_destroyed, request_amendment, individual_ssr)
-    end
-  end
-
   def filter_audit_trail(identity, ssr_ids_that_need_auditing)
     filtered_audit_trail = {:line_items => []}
     ssr_ids_that_need_auditing.each do |ssr_id|
@@ -207,10 +259,8 @@ class NotifierLogic
     filtered_audit_trail[:line_items].flatten
   end
 
-  def authorized_user_audit_report
-
+  def authorized_user_audit_report(joint_ssrs)
     added_ssrs_ids = @created_ssrs_needing_notification.map(&:auditable_id)
-
     destroyed_ssrs_ids = @service_request.deleted_ssrs_since_previous_submission(true).map(&:auditable_id)
 
     created_and_destroyed_ssrs = added_ssrs_ids & destroyed_ssrs_ids
